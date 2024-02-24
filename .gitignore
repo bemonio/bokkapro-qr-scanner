@@ -1,0 +1,68 @@
+# Archivos generados por el entorno de desarrollo
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+/build/
+/captures/
+/ios/Flutter/Generated.xcconfig
+/ios/Flutter/App.framework/flutter_assets
+/ios/Flutter/App.framework/isolate_snapshot_data
+/ios/Flutter/App.framework/kernel_blob.bin
+/ios/Flutter/App.framework/vm_snapshot_data
+/android/.gradle
+/android/app/build/
+/android/gradle/wrapper/gradle-wrapper.jar
+/.idea/
+/.vscode/
+/.metadata
+
+# Archivos generados por el sistema operativo
+.DS_Store
+.idea/
+*.iml
+
+# Android específico
+**/android/app/src/main/gen/
+**/android/local.properties
+
+# iOS específico
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_export_environment.sh
+
+# Dependencias y caché
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+
+# Entorno de desarrollo
+/.idea
+/.vscode
+*.iml
+
+# Android Studio
+.idea/
+*.iml
+.gradle/
+/build/
+
+# Visual Studio Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
