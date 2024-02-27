@@ -1,8 +1,7 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:app/database_helper.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:app/qr_scanner_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Brinks - App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade900),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'QR Scanner'),
@@ -60,25 +59,13 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void showScanQr(BuildContext context) async {}
-
-  void _addRow() async {
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    final latitude = position.latitude;
-    final longitude = position.longitude;
-    final now = DateTime.now();
-    final random = Random();
-    final qr = random.nextInt(999999);
-
-    await _databaseHelper.insertData({
-      'datetime': now.toIso8601String(),
-      'latitude': latitude.toStringAsFixed(6),
-      'longitude': longitude.toStringAsFixed(6),
-      'qr': qr.toString(),
-    });
-
-    setState(() {});
+  void _scanQR(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const QRScannerScreen(),
+      ),
+    );
   }
 
   @override
@@ -125,18 +112,17 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          FloatingActionButton(
-            onPressed: () async {
-              await _databaseHelper.resetDatabase();
-              setState(() {});
-            },
-            tooltip: 'Reset Database',
-            child: const Icon(Icons.refresh),
-          ),
-          const SizedBox(width: 16),
+          // FloatingActionButton(
+          //   onPressed: () async {
+          //     await _databaseHelper.resetDatabase();
+          //     setState(() {});
+          //   },
+          //   tooltip: 'Reset Database',
+          //   child: const Icon(Icons.refresh),
+          // ),
           FloatingActionButton(
             onPressed: () {
-              _addRow();
+              _scanQR(context);
             },
             tooltip: 'Scan QR',
             child: const Icon(Icons.camera_alt),
