@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:app/database_helper.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:app/qr_scanner_screen.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
+import 'package:intl/intl.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +22,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'QR Scanner App',
       theme: ThemeData(
+        primaryColor: Colors.blue,
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.blue,
         ),
@@ -49,6 +52,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   final DatabaseHelper _databaseHelper = DatabaseHelper();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   @override
   void initState() {
@@ -73,17 +78,17 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldMessengerKey,
       appBar: AppBar(
         title: Row(
           children: [
-            // Icono a la izquierda del título
-            const Padding(
-              padding: EdgeInsets.only(right: 8.0),
-              child: ImageIcon(
-                AssetImage('assets/icon.png'),
-                size: 40,
-              ),
-            ),
+            // const Padding(
+            //   padding: EdgeInsets.only(right: 8.0),
+            //   child: ImageIcon(
+            //     AssetImage('assets/icon.png'),
+            //     size: 40,
+            //   ),
+            // ),
             Text(widget.title),
           ],
         ),
@@ -104,16 +109,20 @@ class _MyHomePageState extends State<MyHomePage> {
                 return DataTable(
                   columns: const [
                     DataColumn(label: Text('Fecha y hora')),
+                    DataColumn(label: Text('QR')),
+                    DataColumn(label: Text('Tipo')),
                     DataColumn(label: Text('Latitud')),
                     DataColumn(label: Text('Longitud')),
-                    DataColumn(label: Text('QR')),
+                    DataColumn(label: Text('Dispositivo')),
                   ],
                   rows: dataList
                       .map((data) => DataRow(cells: [
                             DataCell(Text(data['datetime'])),
+                            DataCell(Text(data['qr_data'])),
+                            DataCell(Text(data['qr_type'])),
                             DataCell(Text(data['latitude'])),
                             DataCell(Text(data['longitude'])),
-                            DataCell(Text(data['qr'])),
+                            DataCell(Text(data['device'])),
                           ]))
                       .toList(),
                 );
@@ -122,12 +131,35 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _scanQR(context);
-        },
-        tooltip: 'Scan QR',
-        child: const Icon(Icons.camera_alt),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: () async {
+              await _databaseHelper.resetDatabase();
+              setState(() {});
+            },
+            tooltip: 'Reset Database',
+            child: const Icon(Icons.refresh),
+          ),
+          const SizedBox(width: 16),
+          FloatingActionButton(
+            onPressed: () async {
+              await _sendDatabaseByEmail()
+                  .then((text) => showSnackBar(context, text));
+            },
+            tooltip: 'Send Database',
+            child: const Icon(Icons.email),
+          ),
+          const SizedBox(width: 16),
+          FloatingActionButton(
+            onPressed: () {
+              _scanQR(context);
+            },
+            tooltip: 'Scan QR',
+            child: const Icon(Icons.camera_alt),
+          ),
+        ],
       ),
     );
   }
@@ -139,5 +171,32 @@ class _MyHomePageState extends State<MyHomePage> {
         builder: (context) => const QRScannerScreen(),
       ),
     );
+  }
+
+  Future<String> _sendDatabaseByEmail() async {
+    try {
+      final databasePath = await _databaseHelper.getDatabasePath();
+      final now = DateTime.now();
+      final formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
+      final subject = 'Base de datos SQLite - $formattedDate';
+      final body =
+          'Adjunto el archivo SQLite de la base de datos.\nFecha y hora: $formattedDate';
+      final email = Email(
+        body: body,
+        subject: subject,
+        recipients: ['bemonio@gmail.com'],
+        attachmentPaths: [databasePath],
+        isHTML: false,
+      );
+      await FlutterEmailSender.send(email);
+      return 'Correo electrónico enviado correctamente';
+    } catch (error) {
+      return 'Error al enviar el correo electrónico: $error';
+    }
+  }
+
+  void showSnackBar(BuildContext context, String message) {
+    final snackBar = SnackBar(content: Text(message));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

@@ -45,14 +45,15 @@ class _QRViewExampleState extends State<QRScannerScreen> {
     final latitude = position.latitude;
     final longitude = position.longitude;
     final now = DateTime.now();
-    final qr = qrData;
+    final device = 'hola';
 
     await _databaseHelper.insertData({
       'datetime': now.toIso8601String(),
       'latitude': latitude.toStringAsFixed(6),
       'longitude': longitude.toStringAsFixed(6),
-      'qr_data': qr,
-      'qr_type': qrType.name
+      'qr_data': qrData,
+      'qr_type': qrType.name,
+      'device': device
     });
 
     setState(() {});

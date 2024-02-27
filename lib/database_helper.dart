@@ -1,5 +1,5 @@
-import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper.internal();
@@ -27,6 +27,7 @@ class DatabaseHelper {
         await db.execute('''
           CREATE TABLE qr_data(
             id INTEGER PRIMARY KEY,
+            device TEXT,
             datetime TEXT,
             latitude TEXT,
             longitude TEXT,
@@ -59,5 +60,10 @@ class DatabaseHelper {
     final path = join(databasesPath, 'brinks.db');
     await deleteDatabase(path);
     _db = null;
+  }
+
+  Future<String> getDatabasePath() async {
+    final databasesPath = await getDatabasesPath();
+    return join(databasesPath, 'brinks.db');
   }
 }
