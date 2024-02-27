@@ -30,7 +30,8 @@ class DatabaseHelper {
             datetime TEXT,
             latitude TEXT,
             longitude TEXT,
-            qr TEXT
+            qr_data TEXT,
+            qr_type TEXT
           )
         ''');
       },
@@ -44,10 +45,11 @@ class DatabaseHelper {
 
   Future<List<Map<String, dynamic>>> getData() async {
     final dbClient = await db;
-    return await dbClient.query(
+    final List<Map<String, dynamic>> results = await dbClient.query(
       'qr_data',
       orderBy: 'datetime DESC',
     );
+    return results.isNotEmpty ? results : List<Map<String, dynamic>>.empty();
   }
 
   Future<void> resetDatabase() async {
