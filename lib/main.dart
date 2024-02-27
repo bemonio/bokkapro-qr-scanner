@@ -18,12 +18,23 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Brinks - App',
+      title: 'QR Scanner App',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue.shade900),
-        useMaterial3: true,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.blue,
+        ),
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+            foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+          ),
+        ),
       ),
-      home: const MyHomePage(title: 'QR Scanner'),
+      home: const MyHomePage(title: 'Brinks Caribe App - QR Scanner'),
     );
   }
 }
@@ -59,21 +70,23 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _scanQR(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const QRScannerScreen(),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: Row(
+          children: [
+            // Icono a la izquierda del título
+            const Padding(
+              padding: EdgeInsets.only(right: 8.0),
+              child: ImageIcon(
+                AssetImage('assets/icon.png'),
+                size: 40,
+              ),
+            ),
+            Text(widget.title),
+          ],
+        ),
       ),
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -109,25 +122,21 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          // FloatingActionButton(
-          //   onPressed: () async {
-          //     await _databaseHelper.resetDatabase();
-          //     setState(() {});
-          //   },
-          //   tooltip: 'Reset Database',
-          //   child: const Icon(Icons.refresh),
-          // ),
-          FloatingActionButton(
-            onPressed: () {
-              _scanQR(context);
-            },
-            tooltip: 'Scan QR',
-            child: const Icon(Icons.camera_alt),
-          ),
-        ],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _scanQR(context);
+        },
+        tooltip: 'Scan QR',
+        child: const Icon(Icons.camera_alt),
+      ),
+    );
+  }
+
+  void _scanQR(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const QRScannerScreen(),
       ),
     );
   }
