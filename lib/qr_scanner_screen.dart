@@ -1,9 +1,11 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:app/database_helper.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class QRScannerScreen extends StatefulWidget {
   const QRScannerScreen({super.key});
@@ -45,7 +47,9 @@ class _QRViewExampleState extends State<QRScannerScreen> {
     final latitude = position.latitude;
     final longitude = position.longitude;
     final now = DateTime.now();
-    final device = 'hola';
+
+    // Obtener información del dispositivo
+    String device = await _getDeviceIdentifier();
 
     await _databaseHelper.insertData({
       'datetime': now.toIso8601String(),
@@ -57,6 +61,20 @@ class _QRViewExampleState extends State<QRScannerScreen> {
     });
 
     setState(() {});
+  }
+
+// Método para obtener un identificador único del dispositivo
+  Future<String> _getDeviceIdentifier() async {
+    DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+    if (Platform.isAndroid) {
+      AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
+      return androidInfo.id;
+    } else if (Platform.isIOS) {
+      IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
+      return iosInfo.name;
+    } else {
+      return 'Unknown';
+    }
   }
 
   @override

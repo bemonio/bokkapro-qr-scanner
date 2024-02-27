@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:app/database_helper.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:app/qr_scanner_screen.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:intl/intl.dart';
+import 'package:csv/csv.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -140,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
               setState(() {});
             },
             tooltip: 'Reset Database',
-            child: const Icon(Icons.refresh),
+            child: const Icon(Icons.delete),
           ),
           const SizedBox(width: 16),
           FloatingActionButton(
@@ -175,20 +178,50 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<String> _sendDatabaseByEmail() async {
     try {
-      final databasePath = await _databaseHelper.getDatabasePath();
+      // Obtener los datos de la tabla qr_data
+      List<Map<String, dynamic>> qrDataList = await _databaseHelper.getData();
+
+      // Convertir los datos a formato CSV
+      List<List<dynamic>> csvData = [];
+      for (var row in qrDataList) {
+        csvData.add([
+          row['datetime'],
+          row['latitude'],
+          row['longitude'],
+          row['qr_data'],
+          row['qr_type'],
+        ]);
+      }
+      String csv = const ListToCsvConverter().convert(csvData);
+
+      // Guardar el archivo CSV en el sistema de archivos temporal
+      Directory tempDir = await getTemporaryDirectory();
+      String csvFilePath = '${tempDir.path}/qr_data.csv';
+      File csvFile = File(csvFilePath);
+      await csvFile.writeAsString(csv);
+
+      // Obtener la fecha y hora actual formateada
       final now = DateTime.now();
       final formattedDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(now);
-      final subject = 'Base de datos SQLite - $formattedDate';
+
+      // Configurar el correo electrónico
+      final subject = 'Datos de QR en formato CSV - $formattedDate';
       final body =
-          'Adjunto el archivo SQLite de la base de datos.\nFecha y hora: $formattedDate';
+          'Adjunto el archivo CSV con los datos de la tabla qr_data.\nFecha y hora: $formattedDate';
       final email = Email(
         body: body,
         subject: subject,
         recipients: ['bemonio@gmail.com'],
-        attachmentPaths: [databasePath],
+        attachmentPaths: [csvFilePath],
         isHTML: false,
       );
+
+      // Enviar el correo electrónico
       await FlutterEmailSender.send(email);
+
+      // Eliminar el archivo CSV después de enviar el correo electrónico
+      await csvFile.delete();
+
       return 'Correo electrónico enviado correctamente';
     } catch (error) {
       return 'Error al enviar el correo electrónico: $error';
